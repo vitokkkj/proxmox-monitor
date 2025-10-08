@@ -6,9 +6,8 @@ const NAIVE_TZ_OFFSET_HOURS = 0;
 const MIN_UPDATE_INTERVAL = 10000;
 const MODAL_ITEMS_PER_PAGE = 10; // quantidade de Itens na páginação do modal
 let lastUpdateTime = 0;
-// clientes que, quando vier "DD/MM/YYYY" ambíguo, devem ser interpretados como D/M
 window._forceDayMonthFor = [
-  /Proxmox Matheus/i, // ajuste aqui o(s) nome(s) exato(s) que aparecem no card
+  /Proxmox Matheus/i,
 ];
 // --- Proteções contra sobrecarga / duplicação de timers ---
 let LOAD_TIMER = null;
@@ -47,43 +46,34 @@ function updateTopBadge() {
   el.textContent = `Última atualização: ${formatDateBR(now)}`;
 }
 
-// Converte datas para objetos Date, aplicando offset do fuso
 function parseAsUTCOrISO(raw, offsetHours = NAIVE_TZ_OFFSET_HOURS) {
   if (!raw) return null;
-  // Função auxiliar para aplicar offset
   const withOffset = (d) => {
     if (!(d instanceof Date) || isNaN(d)) return null;
     const result = new Date(d);
     return result;
   };
   const s = String(raw).trim();
-  // Se for timestamp Unix em segundos
   if (typeof raw === "number" || /^\d+$/.test(s)) {
     const timestamp = Number(s);
     return withOffset(
       new Date(timestamp < 1e12 ? timestamp * 1000 : timestamp)
     );
   }
-  // Tenta primeiro formato ISO (YYYY-MM-DDTHH:MM:SSZ ou YYYY-MM-DD HH:MM:SS)
   if (/\dT\d.*(Z|[+-]\d{2}:\d{2})$/.test(s)) {
-    // Ex: 2023-03-15T10:00:00Z
     const t = Date.parse(s);
     if (!isNaN(t)) return withOffset(new Date(t));
   }
-  let m = s.match(/^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2}):(\d{2})$/); // Ex: 2023-03-15 10:00:00
+  let m = s.match(/^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2}):(\d{2})$/);
   if (m) {
     const [, Y, Mo, D, H, Mi, S] = m.map(Number);
-    // Para este formato, o construtor Date(Y, M-1, D, H, M, S) é seguro e interpreta corretamente.
     return withOffset(new Date(Y, Mo - 1, D, H, Mi, S));
   }
-  // Tenta formato brasileiro (DD/MM/YYYY HH:MM:SS)
   m = s.match(/^(\d{2})\/(\d{2})\/(\d{4})[,\s]\s*(\d{2}):(\d{2}):(\d{2})$/);
   if (m) {
-    let [, D, Mo, Y, H, Mi, S] = m.map(Number); // Captura diretamente como Dia, Mês, Ano
-    // O construtor Date(year, monthIndex, day, hours, minutes, seconds) espera monthIndex (0-11)
+    let [, D, Mo, Y, H, Mi, S] = m.map(Number);
     return withOffset(new Date(Y, Mo - 1, D, H, Mi, S));
   }
-  // Tenta parsear como ISO genérico (fallback)
   const parsed = new Date(s);
   return isNaN(parsed.getTime()) ? null : withOffset(parsed);
 }
@@ -107,7 +97,6 @@ function tsToStr(epoch) {
 
 function fmtReceived(at) {
   if (!at) return "";
-  // Reutiliza parseAsUTCOrISO para consistência
   const date = parseAsUTCOrISO(at);
   return date ? formatDateBR(date) : String(at);
 }
@@ -116,7 +105,6 @@ function normalizeNaiveTimestamps(rootEl) {
   if (!rootEl) return;
   const walker = document.createTreeWalker(rootEl, NodeFilter.SHOW_TEXT);
   const nodes = [];
-  // Ajusta a regex para capturar timestamps com ou sem 'T' e com ou sem 'atualizado:'
   const re =
     /\(?(?:atualizado:\s*)?(\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}:\d{2}|\d{2}\/\d{2}\/\d{4}[,\s]\s*\d{2}:\d{2}:\d{2})\)?/g;
   while (walker.nextNode()) nodes.push(walker.currentNode);
@@ -141,7 +129,6 @@ const companyModal = {
   close: document.getElementById("company-modal-close"),
 };
 
-// Função auxiliar para formatar um backup para exibição no modal
 function formatBackupForModal(backup) {
   const statusIcon =
     backup.status === "SUCCESS"
@@ -180,7 +167,6 @@ function formatBackupForModal(backup) {
   `;
 }
 
-// Função auxiliar para formatar a duração
 function formatDuration(seconds) {
   if (seconds === null || isNaN(seconds)) return "0:00:00";
   const hours = Math.floor(seconds / 3600);
@@ -191,7 +177,6 @@ function formatDuration(seconds) {
   ).padStart(2, "0")}`;
 }
 
-// Função auxiliar para formatar data para o modal (DD/MM HH:MM)
 function formatDateBRShort(date) {
   if (!date || !(date instanceof Date) || isNaN(date.getTime())) return "—";
   const dd = String(date.getDate()).padStart(2, "0");
@@ -219,7 +204,7 @@ async function openCompanyModal(companyName, page = 1) {
     const data = await res.json();
     const backups = data.backups;
     const pagination = data.pagination;
-    // 2. Buscar dados de saúde (já temos no cache global __companiesCache)
+    // 2. Buscar dados de saúde
     const companyDataFromCache = (window.__companiesCache || []).find(
       (x) => (x.company_name || "") === companyName
     );
@@ -232,7 +217,7 @@ async function openCompanyModal(companyName, page = 1) {
     if (Object.keys(healthByHost).length > 0) {
       let healthHtmlContent = "";
       Object.entries(healthByHost).forEach(([hostname, h]) => {
-        const pools = h.pools || []; // Já normalizado no backend
+        const pools = h.pools || []; 
         const pillsHtml = pools.length
           ? pools
               .map((p) => {
@@ -318,7 +303,7 @@ async function openCompanyModal(companyName, page = 1) {
 
     companyModal.body.innerHTML = modalBodyHtml;
     normalizeNaiveTimestamps(companyModal.body);
-    // Adicionar listeners para os botões de paginação
+    // Adiciona listeners para os botões de paginação
     const prevButton = document.getElementById("prev-page");
     const nextButton = document.getElementById("next-page");
     if (prevButton) {
@@ -329,7 +314,7 @@ async function openCompanyModal(companyName, page = 1) {
       nextButton.onclick = () =>
         openCompanyModal(companyName, currentModalPage + 1);
     }
-    // --- REPLICAÇÃO (do cache, pois a API /recent não retorna) ---
+    // --- REPLICAÇÃO 
     const rep = companyDataFromCache && companyDataFromCache.replication;
     if (rep && Array.isArray(rep.jobs) && rep.jobs.length) {
       const rows = rep.jobs
@@ -399,8 +384,7 @@ function closeCompanyModal() {
   companyModal.overlay.style.display = "none";
 }
 
-/* ===== cards de resumo (saúde no rodapé + chips alinhados + replicação) ===== */
-// Função para renderizar a saúde do armazenamento como pills numeradas
+/* ===== cards de resumo ===== */
 function renderHealthInlineHTML(healthByHost) {
   if (!healthByHost || Object.keys(healthByHost).length === 0) return "";
 
@@ -416,7 +400,7 @@ function renderHealthInlineHTML(healthByHost) {
       let tip = `Host: ${host} • Pool: ${name} • Status: ${status}`;
 
       if (status === "ONLINE") {
-        statusClass = "pill-ok"; // Usar pill-ok para sucesso
+        statusClass = "pill-ok"; 
       } else if (status === "DEGRADED") {
         statusClass = "pill-warn";
       } else if (
@@ -424,7 +408,7 @@ function renderHealthInlineHTML(healthByHost) {
         status === "OFFLINE" ||
         status === "UNAVAIL"
       ) {
-        statusClass = "pill-fail"; // Usar pill-fail para falha
+        statusClass = "pill-fail"; 
       }
       allHealthPillsHtml.push(
         `<span class="pill ${statusClass}" title="${escAttr(
@@ -434,11 +418,10 @@ function renderHealthInlineHTML(healthByHost) {
     });
 
     // Processar discos SMART (se houver)
-    // Assumindo que 'h.disks' pode existir e conter 'smart_ok'
     (h.disks || []).forEach((d) => {
       const name = d.name || "?";
       const smartOk = d.smart_ok;
-      let statusClass = "pill-warn"; // Default para UNKNOWN/WARN
+      let statusClass = "pill-warn";
       let tip = `Host: ${host} • Disco: ${name} • SMART: ${
         smartOk ? "OK" : "FALHA"
       }`;
@@ -457,14 +440,12 @@ function renderHealthInlineHTML(healthByHost) {
   });
 
   if (allHealthPillsHtml.length === 0) {
-    return '<span class="pill pill-unknown">sem dados de discos</span>'; // Retorna uma pill de "sem dados"
+    return '<span class="pill pill-unknown">sem dados de discos</span>';
   }
 
-  // Retorna as pills agrupadas em uma div para alinhamento
   return `<div class="health-pills-row">${allHealthPillsHtml.join("")}</div>`;
 }
 
-/* ===== cards de resumo (saúde no rodapé + chips alinhados + replicação) ===== */
 function renderSummaryCard(c) {
   if (!c || typeof c !== "object") return "";
 
@@ -560,10 +541,8 @@ function renderSummaryCard(c) {
     }
   }
 
-  // CHAMA A FUNÇÃO MODIFICADA PARA GERAR PILLS DE SAÚDE
   const healthPillsHtml = renderHealthInlineHTML(c.health);
 
-  // A seção de saúde agora volta a ser a summary-health original
   const healthSectionHtml = `
     <div class="summary-section summary-health">
       <div class="summary-label">Discos</div>
@@ -618,21 +597,17 @@ function showTooltip(event) {
   if (!tip || !globalTooltip) return;
   globalTooltip.textContent = tip;
   globalTooltip.classList.add('visible');
-  // Posicionar o tooltip
   const rect = target.getBoundingClientRect();
-  let top = rect.top - globalTooltip.offsetHeight - 10; // 10px acima do dot
+  let top = rect.top - globalTooltip.offsetHeight - 10;
   let left = rect.left + (rect.width / 2) - (globalTooltip.offsetWidth / 2);
-  // Ajustar se sair da tela à esquerda
   if (left < 5) {
     left = 5;
   }
-  // Ajustar se sair da tela à direita
   if (left + globalTooltip.offsetWidth > window.innerWidth - 5) {
     left = window.innerWidth - globalTooltip.offsetWidth - 5;
   }
-  // Ajustar se sair da tela para cima
   if (top < 5) {
-    top = rect.bottom + 10; // 10px abaixo do dot
+    top = rect.bottom + 10;
   }
   globalTooltip.style.top = `${top}px`;
   globalTooltip.style.left = `${left}px`;
@@ -644,7 +619,6 @@ function hideTooltip() {
 }
 
 async function loadSummaries() {
-  // Verifica se já passou tempo suficiente desde a última atualização
   const now = Date.now();
   if (now - lastUpdateTime < MIN_UPDATE_INTERVAL) {
     return;
@@ -672,7 +646,6 @@ async function loadSummaries() {
       arr.forEach(companyData => {
         grid.innerHTML += renderSummaryCard(companyData);
       });
-      // Adicionar listeners para os dots após renderizar os cards
       document.querySelectorAll('.dot').forEach(dot => {
         dot.addEventListener('mouseover', showTooltip);
         dot.addEventListener('mouseout', hideTooltip);

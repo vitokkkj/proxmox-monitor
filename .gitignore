@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+env/
+venv/
+*.egg-info/
+
+# SQLite / dados locais
+data/
+backups.db
+backups.db-*
+*.sqlite
+*.sqlite3
+
+# Logs / SO
+*.log
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Config real (somente exemplo vai ao Git)
+config/config.ini

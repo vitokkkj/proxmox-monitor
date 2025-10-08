@@ -1,0 +1,158 @@
+<!-- FileName: /dashboard.html -->
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard Centralizado de Backups</title>
+
+    <!-- Tailwind (CDN) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Fonte -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
+  </head>
+
+  <body class="bg-[var(--bg-color)] text-[var(--text-color)] font-[Roboto]">
+    <div class="max-w-[1800px] mx-auto p-6">
+      <h1 class="text-center text-3xl font-bold text-[var(--header-text)] mb-6">
+        Dashboard Centralizado de Backups
+      </h1>
+
+      <div class="top-meta">
+        <span id="last-updated" class="last-badge"></span>
+      </div>
+
+      <!-- ====== GRID DE RESUMOS (preenchido via JS) ====== -->
+      <div id="summary-grid" class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 mb-5">
+        <!-- Os cards de resumo serão injetados aqui pelo JavaScript -->
+      </div>
+
+      <!-- ====== CONTEÚDO DETALHADO POR CLIENTE (oculto, base para o modal) ====== -->
+      <!-- Este bloco será preenchido pelo Jinja e seu conteúdo será copiado para o modal pelo JS -->
+      <div id="detailed-content-container" class="hidden">
+        {% if all_companies %}
+          {% for company_name in all_companies %}
+          <div
+            class="client-detail-template"
+            data-company="{{ company_name }}"
+          >
+            {# ---------- SAÚDE DO ARMAZENAMENTO ---------- #}
+            {% set health_hosts = health_by_company[company_name] %}
+            {% if health_hosts %}
+              <div class="px-4 pt-4 pb-1 border-b border-[var(--border-color)]">
+                <strong class="text-[1.05rem]">Saúde do Armazenamento</strong>
+
+                {% for hostname, h in health_hosts.items() %}
+                  {% set raw = h.payload or {} %}
+                  {% set pools = raw.pools or raw.zfs_pools or [] %}
+                  <div class="mt-2">
+                    <div class="text-[#ccc] font-medium">
+                      Host: {{ hostname }}
+                      {% if h.received_at %}
+                        <span class="text-xs text-[#9aa] ml-2">(atualizado: {{ h.received_at }})</span>
+                      {% endif %}
+                    </div>
+
+                    <!-- grid responsivo que NÃO estoura -->
+                    <div class="health-grid mt-2">
+                      {% for p in pools %}
+                        {% set pname = p.name or p.pool_name or '?' %}
+                        {% set pstatus = (p.status or p.health or 'unknown')|lower %}
+                        <span class="health-badge health-{{ pstatus }}">{{ pname }}: {{ (p.status or p.health or 'UNKNOWN')|upper }}</span>
+                      {% endfor %}
+                      {% if pools|length == 0 %}
+                        <span class="text-[#aaa]">sem dados de pools</span>
+                      {% endif %}
+                    </div>
+                  </div>
+                {% endfor %}
+              </div>
+            {% endif %}
+
+            {# ---------- TABELA DE BACKUPS (base do modal) ---------- #}
+            {% if backups_by_company[company_name] %}
+              <div class="overflow-x-auto">
+                <table class="w-full border-collapse">
+                  <thead class="bg-[#333]">
+                    <tr>
+                      <th class="py-3 px-4 text-left whitespace-nowrap">Status</th>
+                      <th class="py-3 px-4 text-left whitespace-nowrap">Host</th>
+                      <th class="py-3 px-4 text-left whitespace-nowrap">VM/CT</th>
+                      <th class="py-3 px-4 text-left whitespace-nowrap">Destino</th>
+                      <th class="py-3 px-4 text-left whitespace-nowrap">Início</th>
+                      <th class="py-3 px-4 text-left whitespace-nowrap">Fim</th>
+                      <th class="py-3 px-4 text-left whitespace-nowrap">Duração</th>
+                      <th class="py-3 px-4 text-left whitespace-nowrap">Escrito</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for backup in backups_by_company[company_name] %}
+                    <tr class="hover:bg-[var(--row-hover-bg)] border-b border-[var(--border-color)] last:border-b-0">
+                      <td class="py-3 px-4 font-bold flex items-center gap-2">
+                        <span>
+                          {% if backup.status == 'SUCCESS' %} ✅
+                          {% elif backup.status in ['ERROR', 'FAIL'] %} ❌
+                          {% else %} ⚠️
+                          {% endif %}
+                        </span>
+                        <span class="status-{{ backup.status }}">{{ backup.status }}</span>
+                      </td>
+                      <td class="py-3 px-4 whitespace-nowrap">{{ backup.proxmox_host }}</td>
+                      <td class="py-3 px-4 whitespace-nowrap">
+                        {{ backup.vm_name or ('ID: ' ~ backup.vmid) }} ({{ backup.vmid }})
+                      </td>
+                      <td class="py-3 px-4 whitespace-nowrap font-semibold">
+                        {{ backup.storage_target or 'N/D' }}
+                      </td>
+                      <td class="py-3 px-4 whitespace-nowrap">{{ backup.start_time_str }}</td>
+                      <td class="py-3 px-4 whitespace-nowrap">{{ backup.end_time_str }}</td>
+                      <td class="py-3 px-4 whitespace-nowrap">{{ backup.duration_str }}</td>
+                      <td class="py-3 px-4 whitespace-nowrap">
+                        {% if backup.written_size_bytes %}
+                          {{ '%.2f'|format(backup.written_size_bytes / (1024*1024*1024)) }} GB
+                        {% else %}
+                          N/A GB
+                        {% endif %}
+                      </td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            {% else %}
+              {% if not health_hosts %}
+                <div class="p-6 text-center text-[#888]">Nenhum dado para este cliente.</div>
+              {% endif %}
+            {% endif %}
+          </div>
+          {% endfor %}
+        {% else %}
+          <div class="p-10 text-center text-lg text-[#888] bg-[var(--card-bg)] rounded-lg">
+            Nenhum registro para exibir.
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Modal “Ver Mais” (corpo é preenchido pelo JS; ele também acrescenta a tabela de replicação) -->
+    <div id="company-modal" class="modal-overlay">
+      <div class="modal-content large">
+        <button class="modal-close" id="company-modal-close">Fechar</button>
+        <h3 id="company-modal-title" style="margin-top: 0"></h3>
+        <div id="company-modal-body"></div>
+      </div>
+    </div>
+
+    <!-- JS -->
+    <script src="{{ url_for('static', filename='script.js') }}" defer></script>
+  </body>
+</html>

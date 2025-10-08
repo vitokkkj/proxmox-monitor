@@ -1,0 +1,12 @@
+[retention]
+default = 30
+# opcional por storage:
+# pbs-pool-a = 20
+# pbs-pool-b = 45
+
+[email]
+smtp_server = smtp.seudominio.com
+smtp_port   = 587
+sender_email = noreply@seudominio.com
+sender_password = TROCAR
+recipient_email = voce@seudominio.com

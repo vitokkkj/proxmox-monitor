@@ -1,0 +1,1174 @@
+/* =========================
+   TOKENS / TEMA
+   ========================= */
+:root {
+  --bg-color: #1e1e1e;
+  --card-bg: #2a2a2a;
+  --text-color: #e0e0e0;
+  --muted-text: #a8a8a8;
+  --border-color: #444;
+  --header-bg: #0070a9;
+  --header-text: #ffffff;
+  --row-hover-bg: #3a3a3a;
+
+  /* Cores de Status - DEFINIÇÕES CLARAS */
+  --green-light: #00ff00; /* Verde claro para dots, bordas de pills, texto de status */
+  --green-dark: #125c2e;  /* Verde escuro para fundo de pills (discos, replicação) */
+  --status-success-text: #ffffff; /* Cor do texto para o verde de sucesso */
+
+  --status-warning: #ffc107;
+  --status-fail: #dc3545;
+
+  --danger-color: #c82333;
+  --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-2: 0 4px 15px rgba(0, 0, 0, 0.3);
+
+  --rep-bg: color-mix(in hsl, var(--card-bg, #12161d) 90%, #fff 10%);
+  --rep-border: var(--border-color, #2a3442);
+  --rep-muted: #9a9fb3;
+  --rep-badge: #212a36;
+
+  --rep-ok: var(--green-dark); /* Fundo da pill de replicação OK */
+  --rep-warn: var(--status-warning, #f59e0b);
+  --rep-fail: var(--status-fail, #ef4444);
+
+  --chip-bg: #121a23;
+  --chip-border: #263041;
+
+  --shadow-soft: 0 8px 24px rgba(0, 0, 0, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.02);
+}
+
+/* =========================
+   BASE
+   ========================= */
+* {
+  box-sizing: border-box;
+}
+html,
+body {
+  height: 100%;
+}
+body {
+  font-family: "Roboto", system-ui, -apple-system, Segoe UI, Arial, sans-serif;
+  margin: 0;
+  padding: 2em;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+}
+h1 {
+  text-align: center;
+  margin: 0 0 1em;
+  color: var(--header-text);
+  font-weight: 700;
+}
+.main-container {
+  max-width: 1800px;
+  margin: 0 auto;
+}
+
+/* Scrollbar (dark) */
+*::-webkit-scrollbar {
+  height: 8px;
+  width: 8px;
+}
+*::-webkit-scrollbar-track {
+  background: #212121;
+}
+*::-webkit-scrollbar-thumb {
+  background: #3d3d3d;
+  border-radius: 6px;
+}
+*::-webkit-scrollbar-thumb:hover {
+  background: #515151;
+}
+
+/* =========================
+   TOOLBAR (mantida)
+   ========================= */
+.toolbar {
+  background-color: var(--card-bg);
+  padding: 1em;
+  border-radius: 8px;
+  margin-bottom: 2em;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1em;
+}
+.toolbar button {
+  background-color: var(--header-bg);
+  color: #fff;
+  border: 0;
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: filter 0.2s, background-color 0.2s;
+}
+.toolbar button:hover {
+  background-color: #005a8a;
+}
+.toolbar button:focus {
+  outline: 2px solid #66b2dd;
+  outline-offset: 2px;
+}
+.clear-section {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.clear-section input[type="date"] {
+  background: #333;
+  color: #fff;
+  border: 1px solid var(--border-color);
+  padding: 6px 8px;
+  border-radius: 6px;
+}
+.btn-danger {
+  background-color: var(--danger-color) !important;
+}
+.btn-danger:hover {
+  background-color: #a71d2a !important;
+}
+
+/* =========================
+   GRID DE RESUMOS (cards do topo)
+   ========================= */
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 12px;
+  margin-bottom: 18px;
+  align-items: stretch; /* cards com mesma altura na linha */
+}
+/* O client-card agora é o summary-card */
+.client-card {
+  background: #1e1f25;
+  border-radius: 10px;
+  padding: 0;
+  box-shadow: var(--shadow-1);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+}
+.client-card.stale {
+  outline: 2px solid var(--status-warning);
+  box-shadow: 0 0 0 3px rgba(255, 193, 7, 0.12);
+}
+.client-card.error {
+  outline: 2px solid var(--status-fail);
+  box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.12);
+}
+
+/* Wrapper para o conteúdo dinâmico do JS dentro do client-card */
+.summary-content-wrapper {
+  padding: 12px 14px;
+  padding-bottom: 45px; /* Espaço para o botão "Ver mais" */
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Cabeçalho com altura fixa e clamp em 2 linhas */
+.summary-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+  height: 44px;
+  margin-bottom: 8px;
+}
+.summary-title {
+  font-weight: 600;
+  color: #f2f2f2;
+
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  max-width: 62%;
+  line-height: 1.15;
+}
+.summary-meta {
+  font-size: 11px;
+  color: #9aa7b3;
+  opacity: 0.95;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
+/* “bolinhas” últimas execuções */
+.dot-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 6px;
+  margin-bottom: 12px;
+  min-height: 18px;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  padding-right: 0;
+}
+.dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  display: inline-block;
+  position: relative;
+}
+.dot.success {
+  background: var(--green-light); /* Verde claro para os dots */
+}
+.dot.fail {
+  background: #ff5b57;
+}
+.dot.warn {
+  background: #f8c22e;
+}
+
+/* estatísticas 24h + respiro até os discos */
+.summary-stats {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  min-height: 32px;
+  font-size: 12px;
+  color: #c9c9c9;
+  margin-top: 2px;
+  margin-bottom: 12px;
+}
+.summary-stat {
+  background: #242633;
+  padding: 6px 8px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Saúde “compacta“ inline nos resumos (rodapé) */
+.summary-health {
+  margin-top: 15px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+.summary-health .summary-label {
+  margin-bottom: 4px;
+}
+.summary-health .health-pills-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+}
+
+/* Rodapé / botão “ver mais” (canto inferior esquerdo) */
+.summary-footer {
+  display: none;
+}
+
+/* Linha dos contadores + CTA “chipado” */
+.summary-row {
+  display: flex;
+  margin-top: 4px;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.summary-chip--cta:hover {
+  filter: brightness(1.12);
+}
+.summary-chip--cta:active {
+  transform: translateY(1px);
+}
+.summary-row .push-right {
+  margin-left: auto;
+}
+
+/* =========================
+   SAÚDE DO ARMAZENAMENTO (GERAL / CARDS)
+   ========================= */
+.health-inline {
+  margin-top: 8px;
+  display: grid;
+  gap: 6px;
+}
+.health-inline-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.health-inline-host {
+  color: #bfc7d5;
+  font-size: 12px;
+  font-weight: 600;
+}
+.health-inline-when {
+  color: #95a0b3;
+  font-size: 11px;
+  margin-left: auto;
+}
+
+/* pílulas genéricas (reuso) */
+.pill {
+  font-size: 11px;
+  line-height: 1;
+  padding: 4px 8px;
+  border-radius: 9999px;
+  border: 1px solid transparent;
+  user-select: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: inline-block;
+  margin: 0;
+}
+.pill-ok {
+  background: var(--green-dark); /* Fundo verde escuro para pills */
+  color: var(--status-success-text);
+  border-color: var(--green-light); /* Borda verde claro para pills */
+}
+.pill-degraded, .pill-warn {
+  background: var(--status-warning);
+  color: #1e1e1e;
+  border-color: color-mix(in srgb, var(--status-warning), #000 20%);
+}
+.pill-faulted, .pill-offline, .pill-fail {
+  background: var(--status-fail);
+  color: #fff;
+  border-color: color-mix(in srgb, var(--status-fail), #000 20%);
+}
+.pill-unknown {
+  background: #8aa0b3;
+  color: #fff;
+  border-color: color-mix(in srgb, #8aa0b3, #000 20%);
+}
+
+/* =========================
+   CARDS POR CLIENTE (accordion)
+   ========================= */
+.client-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5em;
+}
+
+.client-header {
+  background-color: var(--header-bg);
+  color: var(--header-text);
+  padding: 12px 15px;
+  font-size: 1.2em;
+  font-weight: 500;
+  cursor: pointer;
+  user-select: none;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: background-color 0.2s;
+}
+.client-header:hover {
+  background-color: #005a8a;
+}
+.client-header .arrow {
+  font-size: 1.5em;
+  transition: transform 0.3s ease;
+}
+
+.table-wrapper {
+  overflow: hidden;
+}
+
+/* Saúde do armazenamento (dentro do accordion – quando exibido) */
+.health-grid { /* Este é o grid de pills no MODAL */
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 10px;
+  margin-top: 5px;
+}
+.health-badge { /* Este é o estilo das pills no MODAL */
+  padding: 6px 10px;
+  border-radius: 15px;
+  font-size: 0.9em;
+  font-weight: 600;
+  color: #fff;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.health-online { /* Estilo da pill "online" no MODAL */
+  background-color: var(--green-dark); /* Fundo verde escuro para pills no modal */
+  border-color: var(--green-light); /* Borda verde claro para pills no modal */
+}
+.health-degraded {
+  background-color: var(--status-warning);
+  color: #1e1e1e;
+  border-color: color-mix(in srgb, var(--status-warning), #000 20%);
+}
+.health-faulted,
+.health-unavail,
+.health-offline {
+  background-color: var(--status-fail);
+  border-color: color-mix(in srgb, var(--status-fail), #000 20%);
+}
+
+/* =========================
+   TABELA
+   ========================= */
+.table-container {
+  overflow-x: auto;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+th,
+td {
+  padding: 12px 15px;
+  border-bottom: 1px solid var(--border-color);
+  text-align: left;
+  white-space: nowrap;
+}
+tr:last-child td {
+  border-bottom: none;
+}
+th {
+  background-color: #333;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+tr:hover {
+  background-color: var(--row-hover-bg);
+}
+
+/* status */
+.status-cell {
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.status-cell .icon {
+  display: inline-block;
+}
+.status-SUCCESS {
+  color: var(--green-light); /* Usar o verde claro para o texto */
+}
+.status-FAIL {
+  color: var(--status-fail);
+}
+.status-WARNING {
+  color: var(--status-warning);
+}
+.status-ERROR {
+  color: var(--status-fail);
+}
+
+/* “sem dados” */
+.no-backups-message {
+  padding: 40px;
+  text-align: center;
+  font-size: 1.2em;
+  color: #888;
+}
+
+/* =========================
+   MODAIS
+   ========================= */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  display: none;
+  background: rgba(7, 10, 14, 0.75);
+  backdrop-filter: blur(4px);
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+.modal-content {
+  width: min(1200px, 94vw);
+  margin: 6vh auto;
+  background: var(--card-bg, #10151c);
+  border: 1px solid var(--rep-border, rgba(255, 255, 255, 0.06));
+  border-radius: 14px;
+  padding: 18px;
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.35);
+  position: relative;
+}
+.modal-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-top: 20px;
+}
+.modal-buttons button {
+  padding: 10px 20px;
+  border-radius: 6px;
+  border: 0;
+  cursor: pointer;
+  font-weight: 600;
+}
+#modal-confirm-btn,
+#result-ok-btn {
+  background-color: var(--danger-color);
+  color: #fff;
+}
+#modal-cancel-btn {
+  background-color: #555;
+  color: #fff;
+}
+
+/* Modal grande para "ver tabela completa" */
+.modal-content.large {
+  width: min(1400px, 96vw);
+  max-width: 1200px;
+  text-align: left;
+}
+.modal-close {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  background: #555;
+  color: #fff;
+  border: 0;
+  border-radius: 6px;
+  padding: 6px 10px;
+  cursor: pointer;
+}
+.modal-close:hover {
+  filter: brightness(1.1);
+}
+
+/* Modal como LISTA rolável */
+#company-modal .modal-content.large {
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+}
+#company-modal-title {
+  margin: 0 0 10px 0;
+}
+#company-modal-body {
+  overflow: auto;
+  max-height: calc(90vh - 56px);
+  padding-right: 6px;
+}
+#company-modal-body .overflow-x-auto {
+  overflow-y: auto;
+  max-height: inherit;
+}
+#company-modal-body table {
+  width: 100%;
+}
+#company-modal-body thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background-color: #333;
+  box-shadow: 0 1px 0 var(--border-color);
+}
+/* Tabela compacta no modal */
+#company-modal-body .compact-table {
+  width: 100%;
+  font-size: 0.92rem;
+}
+#company-modal-body .compact-table th,
+#company-modal-body .compact-table td {
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+#company-modal-body .cell-dt {
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+}
+#company-modal-body table td,
+#company-modal-body table th {
+  white-space: nowrap; /* Padrão para não quebrar */
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+#company-modal-body table td:nth-child(3), /* VM/CT */
+#company-modal-body table td:nth-child(4)  /* Destino */
+{
+  white-space: normal; /* Permite quebra de linha */
+  word-break: break-word; /* Quebra palavras longas */
+}
+/* Ajustes para a coluna de Duração */
+#company-modal-body table td:nth-child(7) { /* Duração */
+  white-space: nowrap; /* Manter nowrap para duração */
+  min-width: 80px; /* Largura mínima para "0:00:00" */
+  text-align: center; /* Centralizar duração */
+}
+/* Ajustes para as colunas de Data/Hora */
+#company-modal-body table td:nth-child(5), /* Início */
+#company-modal-body table td:nth-child(6)  /* Fim */
+{
+  min-width: 100px; /* Largura mínima para "DD/MM HH:MM" */
+}
+/* Ajustes para a coluna de Escrito */
+#company-modal-body table td:nth-child(8) { /* Escrito */
+  min-width: 90px; /* Largura mínima para "X.XX GB" */
+  text-align: right; /* Alinhar à direita */
+}
+
+/* =========================
+   UTILIDADES
+   ========================= */
+.hidden {
+  display: none !important;
+}
+.mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono",
+    monospace;
+}
+
+/* Links */
+a {
+  color: #7abaff;
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: underline;
+}
+
+/* Meta discreta no topo */
+.top-meta {
+  display: flex;
+  justify-content: flex-end;
+  margin: 6px 0 16px;
+}
+.last-badge {
+  font-size: 12px;
+  color: #9aa7b3;
+  background: #1f242d;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 6px 10px;
+  border-radius: 9999px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  white-space: nowrap;
+}
+@media (max-width: 640px) {
+  .top-meta {
+    justify-content: center;
+  }
+}
+
+/* =========================
+   MEDIA QUERIES
+   ========================= */
+@media (max-width: 1200px) {
+  .summary-grid {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  }
+}
+@media (max-width: 900px) {
+  body {
+    padding: 1rem;
+  }
+  .toolbar {
+    padding: 0.75rem;
+  }
+  th,
+  td {
+    padding: 10px 12px;
+  }
+}
+@media (max-width: 640px) {
+  .summary-grid {
+    grid-template-columns: 1fr;
+  }
+  .client-header {
+    font-size: 1.05em;
+  }
+  .health-grid {
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  }
+  .summary-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* =========================
+   PRINT (opcional)
+   ========================= */
+@media print {
+  body {
+    background: #fff;
+    color: #000;
+  }
+  .toolbar,
+  .modal-overlay {
+    display: none !important;
+  }
+  .client-card,
+  .summary-card {
+    box-shadow: none;
+    border: 1px solid #ddd;
+  }
+  th {
+    position: static;
+  }
+}
+
+/* REPLICAÇÃO — variáveis consolidadas no topo (:root) */
+
+/* =========================================================
+   CHIPS (linha do card)
+   ========================================================= */
+.summary-row .summary-chip {
+  background: var(--chip-bg);
+  border: 1px solid var(--chip-border);
+  border-radius: 14px;
+  padding: 6px 10px;
+  line-height: 1.05;
+  font-weight: 600;
+  font-size: 0.86rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  box-shadow: var(--shadow-soft);
+}
+
+.summary-chip .chev {
+  transform: translateY(-1px);
+  font-size: 0.9em;
+}
+
+.summary-chip--cta {
+  background: linear-gradient(180deg, #0f1925, #0c151f);
+  border-color: #2e3a4d;
+  cursor: pointer;
+  padding: 6px 10px;
+  font-size: 0.86rem;
+  border-radius: 14px;
+}
+.summary-chip--cta:hover {
+  filter: brightness(1.05);
+}
+
+/* variações sem conflitar com o restante do tema */
+.summary-chip.chip-ok {
+  border-color: color-mix(in srgb, var(--rep-ok), #000 35%);
+}
+.summary-chip.chip-warn {
+  border-color: color-mix(in srgb, var(--rep-warn), #000 35%);
+}
+.summary-chip.chip-error {
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--rep-fail), #000 70%),
+    #0b0f15
+  );
+  border-color: color-mix(in srgb, var(--rep-fail), #000 30%);
+  color: #fff;
+}
+
+/* =========================================================
+   MODAL — bloco de replicação
+   ========================================================= */
+.replication-box {
+  margin-top: 18px;
+  border: 1px solid var(--rep-border);
+  background: var(--rep-bg);
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: var(--shadow-soft);
+}
+
+/* Cabeçalho do bloco */
+.replication-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 14px 16px;
+  background: linear-gradient(180deg, #16202c, #121a23);
+  border-bottom: 1px solid var(--rep-border);
+}
+.replication-title {
+  font-weight: 700;
+  font-size: 1.02rem;
+}
+.replication-last {
+  font-size: 0.86rem;
+  color: var(--rep-muted);
+  background: var(--rep-badge);
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--rep-border);
+}
+
+/* Chips/resumo por VM/source/target */
+.replication-chips {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  padding: 12px 12px 4px;
+}
+.rep-chip {
+  background: #0f1620;
+  border: 1px solid var(--rep-border);
+  border-radius: 12px;
+  padding: 10px 12px;
+  display: grid;
+  gap: 6px;
+}
+.rep-chip .rep-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #d5d9e6;
+  font-size: 0.92rem;
+}
+.rep-chip .rep-vm {
+  font-weight: 700;
+  letter-spacing: 0.2px;
+}
+.rep-chip .rep-nodes {
+  color: var(--rep-muted);
+  font-size: 0.88rem;
+}
+.rep-chip .rep-state {
+  margin-left: auto;
+  font-size: 0.82rem;
+  padding: 3px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--rep-border);
+  background: var(--rep-badge);
+}
+
+/* Estado visual */
+.rep-state.ok {
+  color: var(--rep-ok);
+  border-color: color-mix(in srgb, var(--rep-ok), #000 50%);
+}
+.rep-state.warn {
+  color: var(--rep-warn);
+  border-color: color-mix(in srgb, var(--rep-warn), #000 55%);
+}
+.rep-state.fail {
+  color: #fff;
+  background: color-mix(in srgb, var(--rep-fail), #000 70%);
+  border-color: color-mix(in srgb, var(--rep-fail), #000 30%);
+}
+
+/* Tabela detalhada (opcional) */
+.replication-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  margin-top: 6px;
+  border-top: 1px solid var(--rep-border);
+}
+.replication-table thead th {
+  background: #182231;
+  color: #e6e9f2;
+  font-weight: 700;
+  text-align: left;
+  font-size: 0.88rem;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--rep-border);
+}
+.replication-table tbody td {
+  padding: 10px 12px;
+  border-bottom: 1px dashed rgba(255, 255, 255, 0.06);
+  font-size: 0.92rem;
+}
+.replication-table tbody tr:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 3px 8px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  border: 1px solid var(--rep-border);
+  background: var(--rep-badge);
+}
+.badge-ok {
+  color: var(--rep-ok);
+}
+.badge-warn {
+  color: var(--rep-warn);
+}
+.badge-fail {
+  color: #fff;
+  background: color-mix(in srgb, var(--rep-fail), #000 70%);
+  border-color: color-mix(in srgb, var(--rep-fail), #000 30%);
+}
+
+/* =========================================================
+   TABELA COMPACTA (modal)
+   ========================================================= */
+.compact-table {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+.compact-table thead th {
+  background: #182231;
+  color: #e6e9f2;
+  font-weight: 700;
+  padding: 10px 12px;
+  font-size: 0.88rem;
+  border-bottom: 1px solid var(--rep-border);
+}
+.compact-table tbody td {
+  padding: 10px 12px;
+  font-size: 0.92rem;
+  border-bottom: 1px dashed rgba(255, 255, 255, 0.06);
+}
+.compact-table tbody tr:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+/* Colunas numéricas/datas no modal */
+.cell-num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.cell-dt {
+  font-variant-numeric: tabular-nums;
+}
+
+/* =========================================================
+   SAÚDE INLINE (pílulas) — retoques
+   ========================================================= */
+.health-inline {
+  display: grid;
+  gap: 8px;
+}
+.health-inline-row {
+  display: grid;
+  grid-template-columns: 130px 1fr auto;
+  align-items: center;
+  gap: 10px;
+}
+.health-inline-host {
+  font-weight: 700;
+  color: #dbe2f1;
+}
+.health-inline-when {
+  font-size: 0.8rem;
+  color: var(--rep-muted);
+  background: var(--rep-badge);
+  border: 1px solid var(--rep-border);
+  padding: 3px 8px;
+  border-radius: 999px;
+}
+
+/* Espaço reservado para o CTA absoluto e para os dots */
+
+/* Responsividade: em telas pequenas o CTA volta para o fluxo normal */
+@media (max-width: 640px) {
+  .client-card .btn-vermais {
+    position: static;
+    margin-left: auto;
+    order: 99;
+  }
+  .dot-row {
+    padding-right: 0;
+  }
+}
+
+/* Mantém o footer (legacy) mas o padrão visual do projeto é escondê-lo */
+.summary-footer {
+  display: none;
+}
+
+/* Posicionamento absoluto do CTA "VER MAIS" alinhado aos dots */
+.client-card .btn-vermais {
+  position: absolute;
+  bottom: 10px;
+  right: 14px;
+  background: #000205;
+  color: #fff;
+  border: none;
+  padding: 5px 12px;
+  border-radius: 9999px;
+  font-size: 0.78rem;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  z-index: 2;
+}
+
+.client-card .btn-vermais:hover {
+  background: #28a745;
+}
+
+/* Centralizar de verdade os dots */
+.dot-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.summary-backups {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.summary-backups-header {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.btn-plus {
+  display: none;
+}
+
+.summary-label {
+  font-size: 0.75rem;
+  color: #aaa;
+  margin-bottom: 2px;
+  font-weight: 700;
+}
+
+/* Padrão para qualquer pill */
+.pill {
+  display: inline-block;
+  padding: 4px 10px;
+  margin: 3px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #fff;
+  white-space: nowrap;
+}
+
+/* Replicação */
+.pill-ok {
+  background: var(--green-dark);
+  color: var(--status-success-text);
+  border-color: var(--green-light);
+}
+
+.pill-fail {
+  background: var(--status-fail);
+  color: #fff;
+  border-color: color-mix(in srgb, var(--status-fail), #000 20%);
+}
+
+.pill-warn {
+  background: var(--status-warning);
+  color: #1e1e1e;
+  border-color: color-mix(in srgb, var(--status-warning), #000 20%);
+}
+
+/* Discos (mantém os antigos verdinhos) */
+.pill-disk {
+  background: #09da1a;
+}
+
+/* Container das pills de replicação */
+.summary-repl {
+  text-align: center;
+  margin-top: 4px;
+}
+.summary-repl .summary-health,
+.summary-repl .repl-pills {
+  margin-top: 4px;
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.summary-repl .repl-pills {
+  margin-top: 2px;
+}
+.summary-repl .summary-meta {
+  margin-top: 4px;
+  font-size: 0.7rem;
+  opacity: 0.8;
+}
+
+/* Accordion para o modal */
+.accordion-header {
+  background-color: #333;
+  color: #fff;
+  padding: 10px 15px;
+  width: 100%;
+  text-align: left;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 1.1em;
+  font-weight: 500;
+  border-bottom: 1px solid var(--border-color);
+}
+.accordion-header:hover {
+  background-color: #444;
+}
+.accordion-icon {
+  transition: transform 0.3s ease;
+}
+.accordion-body {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.5s ease-in-out;
+  background-color: var(--card-bg);
+}
+.accordion-body.open {
+  max-height: 500px;
+}
+.accordion-header.active .accordion-icon {
+  transform: rotate(90deg);
+}
+
+/* Ajustes para o table-wrapper dentro do modal */
+#company-modal-body .overflow-x-auto {
+  overflow-y: auto;
+  max-height: inherit;
+}
+#company-modal-body .table-wrapper {
+  display: block;
+  max-height: none;
+  overflow: visible;
+  transition: none;
+}
+
+#global-tooltip {
+  position: fixed; /* Fixado na viewport */
+  background: #2b2d36;
+  color: #fff;
+  padding: 6px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  white-space: nowrap;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+  z-index: 9999; /* Z-index alto para ficar acima de tudo */
+  pointer-events: none; /* Não interfere com eventos do mouse */
+  opacity: 0;
+  transition: opacity 0.2s ease-in-out;
+}
+#global-tooltip.visible {
+  opacity: 1;
+}

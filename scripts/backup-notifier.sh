@@ -15,7 +15,6 @@ USER_AGENT="backup-notifier/1.3-universal"
 
 DEBUG="${DEBUG:-0}"
 FORCE_RESCAN="${FORCE_RESCAN:-0}"
-# ### CHANGE: opcional – limita varredura a N dias (0 = sem filtro)
 MAX_AGE_DAYS="${MAX_AGE_DAYS:-0}"
 
 ################################
@@ -40,7 +39,6 @@ if [[ "$FORCE_RESCAN" -eq 1 ]]; then
 else
   [[ -f "$STATE_FILE" ]] && LAST_TS="$(cat "$STATE_FILE" 2>/dev/null || echo 0)"
 fi
-# ### CHANGE: guardaremos o MAIOR ts visto nesta execução e só gravaremos no final
 RUN_MAX_TS="$LAST_TS"
 
 info "Empresa: $NOME_EMPRESA | Host: $PROXMOX_HOST"
@@ -123,7 +121,6 @@ to_bytes(){
 }
 
 hms_to_seconds() {
-  # aceita H:M:S ou M:S
   local h=0 m=0 s=0 IFS=:
   read -r a b c <<< "$1"
   if [[ -n "$c" ]]; then
@@ -137,12 +134,10 @@ hms_to_seconds() {
 ################################
 # Extrações de log
 ################################
-# --- SUBSTITUA A FUNÇÃO extract_times_from_block POR ESTA ---
 extract_times_from_block() {
   local blk="$1"
   local start_fmt="" end_fmt="" line
 
-  # tenta pegar "started" / "finished" / "failed"
   while IFS= read -r line; do
     case "$line" in
       ("INFO: Backup started at "*)
@@ -161,7 +156,6 @@ extract_times_from_block() {
   [[ -n "$start_fmt" ]] && start_epoch="$(LC_ALL=C date -d "$start_fmt" +%s 2>/dev/null || true)"
   [[ -n "$end_fmt"   ]] && end_epoch="$(LC_ALL=C date -d "$end_fmt"   +%s 2>/dev/null || true)"
 
-  # fallback: se fim não veio, tenta a duração "(HH:MM:SS)" da linha "Finished Backup of ..."
   if [[ -z "${end_epoch:-}" || -z "$end_epoch" ]]; then
     local finish_line dur hms
     finish_line="$(grep -m1 -E '^INFO: Finished Backup of (VM|CT) ' <<<"$blk" || true)"
@@ -216,7 +210,6 @@ extract_written_bytes() {
 extract_total_bytes() {
   local blk="$1" last num unit
 
-  # QEMU: pega o último token do "include disk ... 450G"
   last="$(grep -E ' include disk' <<<"$blk" | awk '{print $NF}' | tail -n1 || true)"
   if [[ -n "$last" ]]; then
     case "$last" in
@@ -237,8 +230,6 @@ extract_total_bytes() {
     [[ -n "$num" ]] && { to_bytes "$num $unit"; return; }
   fi
 
-  # LXC: "had to backup 59.213 MiB of 1.28 GiB ..."
-  # Pega o SEGUNDO par (1.28 GiB) = total
   read -r num unit < <(
     awk '
       match($0,/had to backup [0-9.]+ ([KMGT]i?B|[KMGT]B) of ([0-9.]+) ([KMGT]i?B|[KMGT]B)/,m){print m[2],m[3]; exit}
@@ -392,7 +383,6 @@ process_log_file(){
     send_record "$JSON"
   done
 
-  # ### CHANGE: atualiza apenas o MAIOR timestamp visto
   if (( ts > RUN_MAX_TS )); then
     RUN_MAX_TS="$ts"
   fi
@@ -403,7 +393,6 @@ process_log_file(){
 ################################
 VM_MAP="$(build_vm_map || true)"
 
-# monta expressão -mtime se MAX_AGE_DAYS vier setado (ex.: 1 = últimos 1 dia)
 AGE_EXPR=()
 if [[ -n "${MAX_AGE_DAYS:-}" && "$MAX_AGE_DAYS" =~ ^[0-9]+$ ]]; then
   AGE_EXPR=(-mtime "-$MAX_AGE_DAYS")
@@ -414,7 +403,6 @@ find "$LOG_DIR" -type f \( -name '*vzdump*' -o -name '*backup*' \) "${AGE_EXPR[@
     process_log_file "$LOG_FILE"
   done
 
-# ### CHANGE: grava o estado uma vez, com o maior TS da execução
 echo "$RUN_MAX_TS" > "$STATE_FILE"
 
 exit 0

@@ -4,7 +4,7 @@
 NOME_EMPRESA="Proxmox Matheus"
 
 # --- Configuração Técnica ---
-DEBIAN_API_URL="http://192.168.1.52:5000/api/health"   # <- ROTA CORRETA
+DEBIAN_API_URL="http://192.168.1.52:5000/api/health" 
 PROXMOX_HOST=$(hostname -s)
 
 # Verifica se zpool existe
@@ -16,7 +16,6 @@ fi
 # Gera pares: "<pool> <state>"
 PARSED_LIST=$(zpool status | awk '/^  pool:/ {pool_name=$2} /^ state:/ {if (pool_name) {print pool_name, $2; pool_name=""}}')
 
-# Nada pra enviar?
 [ -z "$PARSED_LIST" ] && exit 0
 
 # Monta o JSON no formato aceito pelo backend

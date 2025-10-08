@@ -33,11 +33,9 @@
 
       <!-- ====== GRID DE RESUMOS (preenchido via JS) ====== -->
       <div id="summary-grid" class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 mb-5">
-        <!-- Os cards de resumo serão injetados aqui pelo JavaScript -->
       </div>
 
       <!-- ====== CONTEÚDO DETALHADO POR CLIENTE (oculto, base para o modal) ====== -->
-      <!-- Este bloco será preenchido pelo Jinja e seu conteúdo será copiado para o modal pelo JS -->
       <div id="detailed-content-container" class="hidden">
         {% if all_companies %}
           {% for company_name in all_companies %}
@@ -62,7 +60,6 @@
                       {% endif %}
                     </div>
 
-                    <!-- grid responsivo que NÃO estoura -->
                     <div class="health-grid mt-2">
                       {% for p in pools %}
                         {% set pname = p.name or p.pool_name or '?' %}
@@ -143,7 +140,7 @@
       </div>
     </div>
 
-    <!-- Modal “Ver Mais” (corpo é preenchido pelo JS; ele também acrescenta a tabela de replicação) -->
+    <!-- Modal “Ver Mais” -->
     <div id="company-modal" class="modal-overlay">
       <div class="modal-content large">
         <button class="modal-close" id="company-modal-close">Fechar</button>

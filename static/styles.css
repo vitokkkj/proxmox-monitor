@@ -84,7 +84,7 @@ h1 {
 }
 
 /* =========================
-   TOOLBAR (mantida)
+   TOOLBAR 
    ========================= */
 .toolbar {
   background-color: var(--card-bg);
@@ -134,16 +134,15 @@ h1 {
 }
 
 /* =========================
-   GRID DE RESUMOS (cards do topo)
+   GRID DE RESUMOS 
    ========================= */
 .summary-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
   gap: 12px;
   margin-bottom: 18px;
-  align-items: stretch; /* cards com mesma altura na linha */
+  align-items: stretch;
 }
-/* O client-card agora é o summary-card */
 .client-card {
   background: #1e1f25;
   border-radius: 10px;
@@ -166,16 +165,14 @@ h1 {
   box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.12);
 }
 
-/* Wrapper para o conteúdo dinâmico do JS dentro do client-card */
 .summary-content-wrapper {
   padding: 12px 14px;
-  padding-bottom: 45px; /* Espaço para o botão "Ver mais" */
+  padding-bottom: 45px;
   flex-grow: 1;
   display: flex;
   flex-direction: column;
 }
 
-/* Cabeçalho com altura fixa e clamp em 2 linhas */
 .summary-header {
   display: flex;
   justify-content: space-between;
@@ -205,7 +202,6 @@ h1 {
   overflow: hidden;
 }
 
-/* “bolinhas” últimas execuções */
 .dot-row {
   display: flex;
   flex-wrap: wrap;
@@ -226,7 +222,7 @@ h1 {
   position: relative;
 }
 .dot.success {
-  background: var(--green-light); /* Verde claro para os dots */
+  background: var(--green-light);
 }
 .dot.fail {
   background: #ff5b57;
@@ -235,7 +231,6 @@ h1 {
   background: #f8c22e;
 }
 
-/* estatísticas 24h + respiro até os discos */
 .summary-stats {
   display: flex;
   gap: 10px;
@@ -253,7 +248,6 @@ h1 {
   border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-/* Saúde “compacta“ inline nos resumos (rodapé) */
 .summary-health {
   margin-top: 15px;
   display: flex;
@@ -271,12 +265,10 @@ h1 {
   gap: 6px;
 }
 
-/* Rodapé / botão “ver mais” (canto inferior esquerdo) */
 .summary-footer {
   display: none;
 }
 
-/* Linha dos contadores + CTA “chipado” */
 .summary-row {
   display: flex;
   margin-top: 4px;
@@ -320,7 +312,6 @@ h1 {
   margin-left: auto;
 }
 
-/* pílulas genéricas (reuso) */
 .pill {
   font-size: 11px;
   line-height: 1;
@@ -335,9 +326,9 @@ h1 {
   margin: 0;
 }
 .pill-ok {
-  background: var(--green-dark); /* Fundo verde escuro para pills */
+  background: var(--green-dark); 
   color: var(--status-success-text);
-  border-color: var(--green-light); /* Borda verde claro para pills */
+  border-color: var(--green-light); 
 }
 .pill-degraded, .pill-warn {
   background: var(--status-warning);
@@ -389,14 +380,14 @@ h1 {
   overflow: hidden;
 }
 
-/* Saúde do armazenamento (dentro do accordion – quando exibido) */
-.health-grid { /* Este é o grid de pills no MODAL */
+/* Saúde do armazenamento  */
+.health-grid { 
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
   gap: 10px;
   margin-top: 5px;
 }
-.health-badge { /* Este é o estilo das pills no MODAL */
+.health-badge { 
   padding: 6px 10px;
   border-radius: 15px;
   font-size: 0.9em;
@@ -407,9 +398,9 @@ h1 {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.health-online { /* Estilo da pill "online" no MODAL */
-  background-color: var(--green-dark); /* Fundo verde escuro para pills no modal */
-  border-color: var(--green-light); /* Borda verde claro para pills no modal */
+.health-online { 
+  background-color: var(--green-dark); 
+  border-color: var(--green-light);
 }
 .health-degraded {
   background-color: var(--status-warning);
@@ -464,7 +455,7 @@ tr:hover {
   display: inline-block;
 }
 .status-SUCCESS {
-  color: var(--green-light); /* Usar o verde claro para o texto */
+  color: var(--green-light); 
 }
 .status-FAIL {
   color: var(--status-fail);
@@ -476,7 +467,6 @@ tr:hover {
   color: var(--status-fail);
 }
 
-/* “sem dados” */
 .no-backups-message {
   padding: 40px;
   text-align: center;
@@ -530,7 +520,6 @@ tr:hover {
   color: #fff;
 }
 
-/* Modal grande para "ver tabela completa" */
 .modal-content.large {
   width: min(1400px, 96vw);
   max-width: 1200px;
@@ -551,7 +540,6 @@ tr:hover {
   filter: brightness(1.1);
 }
 
-/* Modal como LISTA rolável */
 #company-modal .modal-content.large {
   max-height: 90vh;
   display: flex;
@@ -579,7 +567,6 @@ tr:hover {
   background-color: #333;
   box-shadow: 0 1px 0 var(--border-color);
 }
-/* Tabela compacta no modal */
 #company-modal-body .compact-table {
   width: 100%;
   font-size: 0.92rem;
@@ -597,32 +584,31 @@ tr:hover {
 }
 #company-modal-body table td,
 #company-modal-body table th {
-  white-space: nowrap; /* Padrão para não quebrar */
+  white-space: nowrap; 
   overflow: hidden;
   text-overflow: ellipsis;
 }
 #company-modal-body table td:nth-child(3), /* VM/CT */
 #company-modal-body table td:nth-child(4)  /* Destino */
 {
-  white-space: normal; /* Permite quebra de linha */
-  word-break: break-word; /* Quebra palavras longas */
+  white-space: normal; 
+  word-break: break-word;
 }
-/* Ajustes para a coluna de Duração */
-#company-modal-body table td:nth-child(7) { /* Duração */
-  white-space: nowrap; /* Manter nowrap para duração */
-  min-width: 80px; /* Largura mínima para "0:00:00" */
-  text-align: center; /* Centralizar duração */
+#company-modal-body table td:nth-child(7) { 
+  white-space: nowrap; 
+  min-width: 80px; 
+  text-align: center; 
 }
-/* Ajustes para as colunas de Data/Hora */
-#company-modal-body table td:nth-child(5), /* Início */
-#company-modal-body table td:nth-child(6)  /* Fim */
+
+#company-modal-body table td:nth-child(5), 
+#company-modal-body table td:nth-child(6),
 {
-  min-width: 100px; /* Largura mínima para "DD/MM HH:MM" */
+  min-width: 100px; 
 }
-/* Ajustes para a coluna de Escrito */
-#company-modal-body table td:nth-child(8) { /* Escrito */
-  min-width: 90px; /* Largura mínima para "X.XX GB" */
-  text-align: right; /* Alinhar à direita */
+
+#company-modal-body table td:nth-child(8) { 
+  min-width: 90px; 
+  text-align: right; 
 }
 
 /* =========================
@@ -645,7 +631,6 @@ a:hover {
   text-decoration: underline;
 }
 
-/* Meta discreta no topo */
 .top-meta {
   display: flex;
   justify-content: flex-end;
@@ -704,7 +689,7 @@ a:hover {
 }
 
 /* =========================
-   PRINT (opcional)
+   PRINT
    ========================= */
 @media print {
   body {
@@ -725,10 +710,9 @@ a:hover {
   }
 }
 
-/* REPLICAÇÃO — variáveis consolidadas no topo (:root) */
 
 /* =========================================================
-   CHIPS (linha do card)
+   CHIPS 
    ========================================================= */
 .summary-row .summary-chip {
   background: var(--chip-bg);
@@ -761,7 +745,6 @@ a:hover {
   filter: brightness(1.05);
 }
 
-/* variações sem conflitar com o restante do tema */
 .summary-chip.chip-ok {
   border-color: color-mix(in srgb, var(--rep-ok), #000 35%);
 }
@@ -790,7 +773,6 @@ a:hover {
   box-shadow: var(--shadow-soft);
 }
 
-/* Cabeçalho do bloco */
 .replication-head {
   display: flex;
   align-items: center;
@@ -813,7 +795,6 @@ a:hover {
   border: 1px solid var(--rep-border);
 }
 
-/* Chips/resumo por VM/source/target */
 .replication-chips {
   display: grid;
   gap: 10px;
@@ -852,7 +833,6 @@ a:hover {
   background: var(--rep-badge);
 }
 
-/* Estado visual */
 .rep-state.ok {
   color: var(--rep-ok);
   border-color: color-mix(in srgb, var(--rep-ok), #000 50%);
@@ -867,7 +847,6 @@ a:hover {
   border-color: color-mix(in srgb, var(--rep-fail), #000 30%);
 }
 
-/* Tabela detalhada (opcional) */
 .replication-table {
   width: 100%;
   border-collapse: separate;
@@ -939,7 +918,6 @@ a:hover {
   background: rgba(255, 255, 255, 0.03);
 }
 
-/* Colunas numéricas/datas no modal */
 .cell-num {
   text-align: right;
   font-variant-numeric: tabular-nums;
@@ -974,9 +952,6 @@ a:hover {
   border-radius: 999px;
 }
 
-/* Espaço reservado para o CTA absoluto e para os dots */
-
-/* Responsividade: em telas pequenas o CTA volta para o fluxo normal */
 @media (max-width: 640px) {
   .client-card .btn-vermais {
     position: static;
@@ -988,12 +963,10 @@ a:hover {
   }
 }
 
-/* Mantém o footer (legacy) mas o padrão visual do projeto é escondê-lo */
 .summary-footer {
   display: none;
 }
 
-/* Posicionamento absoluto do CTA "VER MAIS" alinhado aos dots */
 .client-card .btn-vermais {
   position: absolute;
   bottom: 10px;
@@ -1013,7 +986,6 @@ a:hover {
   background: #28a745;
 }
 
-/* Centralizar de verdade os dots */
 .dot-row {
   display: flex;
   justify-content: center;
@@ -1050,7 +1022,6 @@ a:hover {
   font-weight: 700;
 }
 
-/* Padrão para qualquer pill */
 .pill {
   display: inline-block;
   padding: 4px 10px;
@@ -1081,12 +1052,10 @@ a:hover {
   border-color: color-mix(in srgb, var(--status-warning), #000 20%);
 }
 
-/* Discos (mantém os antigos verdinhos) */
 .pill-disk {
   background: #09da1a;
 }
 
-/* Container das pills de replicação */
 .summary-repl {
   text-align: center;
   margin-top: 4px;
@@ -1108,7 +1077,6 @@ a:hover {
   opacity: 0.8;
 }
 
-/* Accordion para o modal */
 .accordion-header {
   background-color: #333;
   color: #fff;
@@ -1143,7 +1111,6 @@ a:hover {
   transform: rotate(90deg);
 }
 
-/* Ajustes para o table-wrapper dentro do modal */
 #company-modal-body .overflow-x-auto {
   overflow-y: auto;
   max-height: inherit;
@@ -1156,7 +1123,7 @@ a:hover {
 }
 
 #global-tooltip {
-  position: fixed; /* Fixado na viewport */
+  position: fixed; 
   background: #2b2d36;
   color: #fff;
   padding: 6px 8px;
@@ -1164,8 +1131,8 @@ a:hover {
   font-size: 12px;
   white-space: nowrap;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
-  z-index: 9999; /* Z-index alto para ficar acima de tudo */
-  pointer-events: none; /* Não interfere com eventos do mouse */
+  z-index: 9999; 
+  pointer-events: none; 
   opacity: 0;
   transition: opacity 0.2s ease-in-out;
 }

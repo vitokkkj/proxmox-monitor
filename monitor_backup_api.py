@@ -48,7 +48,6 @@ def add_header(response):
 def get_db():
     db = sqlite3.connect(DATABASE, timeout=30)
     db.row_factory = sqlite3.Row
-    # Otimizações básicas do SQLite
     db.execute('PRAGMA journal_mode=WAL')  # Write-Ahead Logging para melhor concorrência
     db.execute('PRAGMA synchronous=NORMAL')  # Compromisso entre segurança e performance
     return db
@@ -86,12 +85,10 @@ def init_db():
             );
         ''')
         
-        # Adiciona índices para melhorar performance das consultas
         c.execute('CREATE INDEX IF NOT EXISTS idx_backups_company ON backups(company_name);')
         c.execute('CREATE INDEX IF NOT EXISTS idx_backups_start_time ON backups(start_time);')
         c.execute('CREATE INDEX IF NOT EXISTS idx_backups_company_time ON backups(company_name, start_time);')
 
-        # migrações defensivas (instalações antigas)
         _ensure_column(c, "backups", "vmid", "TEXT")
         _ensure_column(c, "backups", "vm_name", "TEXT")
 
@@ -133,7 +130,6 @@ def init_db():
                 received_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
         ''')
-        # migrações defensivas para replication
         _ensure_column(c, "replication", "vmid", "TEXT")
         _ensure_column(c, "replication", "vm_name", "TEXT")
         _ensure_column(c, "replication", "source_node", "TEXT")
@@ -431,8 +427,6 @@ def api_health():
     except Exception as e:
         return jsonify({"error": f"An unexpected error occurred: {e}"}), 500
 
-
-# Página simples para debug do que foi recebido
 @app.route('/health', methods=['GET'])
 def health_list_page():
     db = get_db()
@@ -659,7 +653,6 @@ def _row_to_dict(row):
 
 @app.route("/api/companies", methods=["GET"])
 def list_companies():
-    # limita o "limit" para evitar absurdos
     try:
         limit = int(request.args.get("limit", 6))
     except ValueError:
@@ -670,7 +663,7 @@ def list_companies():
     db.row_factory = sqlite3.Row
     cur = db.cursor()
 
-    # 1) Empresas (normaliza NULL -> "")
+    # 1) Empresas 
     companies = [
         ((r["company_name"] or "").strip())
         for r in cur.execute(
@@ -681,7 +674,7 @@ def list_companies():
     now = int(time.time())
     since_24h = now - 24 * 3600
 
-    # 2) Health (snapshot) — chavear pelo MESMO normalizador: "" para vazio
+    # 2) Health (snapshot) 
     health_rows = cur.execute(
         """
         SELECT h1.*
@@ -696,7 +689,7 @@ def list_companies():
 
     health_by_company = {}
     for r in health_rows:
-        comp_key = ((r["company_name"] or "").strip())  # <<=== mesma regra
+        comp_key = ((r["company_name"] or "").strip())  
         try:
             payload = json.loads(r["payload_json"]) or {}
         except Exception:
@@ -714,7 +707,7 @@ def list_companies():
             "pools": norm_pools,
         }
 
-    # 3) Replicação (últimos por vm/source/target) — mesma normalização
+    # 3) Replicação 
     repl_by_company = {}
     repl_rows = cur.execute(
         """
@@ -735,7 +728,7 @@ def list_companies():
     payload = []
 
     for c in companies:
-        # 4) Último update — usar IFNULL para casar "" com NULL
+        # 4) Último update 
         last = cur.execute(
             "SELECT end_time FROM backups WHERE IFNULL(company_name,'')=? ORDER BY end_time DESC LIMIT 1",
             (c,),
@@ -819,12 +812,12 @@ def list_companies():
             "jobs": repl_jobs_out,
         }
 
-        # 8) Nome para exibição (sem quebrar chaveamento interno)
+        # 8) Nome para exibição 
         display_name = c if c else "Cliente Indefinido"
 
         payload.append({
-            "company_name": display_name,  # label bonito
-            "company_key": c,              # chave normalizada ("" quando vazio)
+            "company_name": display_name, 
+            "company_key": c,              
             "last_update": last_update,
             "last_update_str": last_update_str,
             "stats_24h": stats_24h,
